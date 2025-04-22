@@ -11,6 +11,14 @@ local flying = false
 local flySpeed = 100
 local bodyVelocity
 
+local function resetCharacterReferences()
+	character = player.Character or player.CharacterAdded:Wait()
+	humanoid = character:WaitForChild("Humanoid")
+	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+end
+
+player.CharacterAdded:Connect(resetCharacterReferences)
+
 -- Fonction pour démarrer le vol
 local function startFlying()
 	if flying then return end
@@ -22,7 +30,6 @@ local function startFlying()
 	humanoid.PlatformStand = true
 end
 
--- Fonction pour arrêter le vol
 local function stopFlying()
 	if not flying then return end
 	flying = false
@@ -33,7 +40,6 @@ local function stopFlying()
 	humanoid.PlatformStand = false
 end
 
--- Fonction de mise à jour du vol
 local function updateFlight()
 	if flying then
 		local direction = Vector3.new(0, 0, 0)
@@ -99,7 +105,7 @@ local function createTabButton(name, posX)
 	local button = Instance.new("TextButton")
 	button.Parent = tabBar
 	button.Text = name
-	button.Size = UDim2.new(0, 150, 1, 0)
+	button.Size = UDim2.new(0, 100, 1, 0)
 	button.Position = UDim2.new(0, posX, 0, 0)
 	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -113,6 +119,13 @@ mainTab.Position = UDim2.new(0, 0, 0, 60)
 mainTab.Size = UDim2.new(1, 0, 1, -60)
 mainTab.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
+local playerTab = Instance.new("Frame")
+playerTab.Parent = frame
+playerTab.Position = UDim2.new(0, 0, 0, 60)
+playerTab.Size = UDim2.new(1, 0, 1, -60)
+playerTab.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+playerTab.Visible = false
+
 local miscTab = Instance.new("Frame")
 miscTab.Parent = frame
 miscTab.Position = UDim2.new(0, 0, 0, 60)
@@ -120,51 +133,105 @@ miscTab.Size = UDim2.new(1, 0, 1, -60)
 miscTab.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 miscTab.Visible = false
 
-local creatorLabel = Instance.new("TextLabel")
-creatorLabel.Parent = miscTab
-creatorLabel.Size = UDim2.new(1, 0, 1, 0)
-creatorLabel.Text = "🛠️ Created by : Anakondax & Traydox 🛠️"
-creatorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-creatorLabel.BackgroundTransparency = 1
-creatorLabel.TextSize = 16
-creatorLabel.TextWrapped = true
-creatorLabel.TextYAlignment = Enum.TextYAlignment.Center
-creatorLabel.TextXAlignment = Enum.TextXAlignment.Center
-
+-- Onglets
 local mainBtn = createTabButton("Main", 0)
-local miscBtn = createTabButton("Misc", 150)
+local playerBtn = createTabButton("Player", 100)
+local miscBtn = createTabButton("Misc", 200)
 
 mainBtn.MouseButton1Click:Connect(function()
 	mainTab.Visible = true
+	playerTab.Visible = false
+	miscTab.Visible = false
+end)
+
+playerBtn.MouseButton1Click:Connect(function()
+	mainTab.Visible = false
+	playerTab.Visible = true
 	miscTab.Visible = false
 end)
 
 miscBtn.MouseButton1Click:Connect(function()
 	mainTab.Visible = false
+	playerTab.Visible = false
 	miscTab.Visible = true
 end)
 
--- 🔘 Fly Toggle
-local flyButton = Instance.new("TextButton")
-flyButton.Parent = mainTab
-flyButton.Size = UDim2.new(0, 150, 0, 30)
-flyButton.Position = UDim2.new(0, 75, 0, 30)
-flyButton.Text = "Activer Vol"
-flyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.TextSize = 14
+-- WalkSpeed
+local walkSpeedLabel = Instance.new("TextLabel")
+walkSpeedLabel.Parent = playerTab
+walkSpeedLabel.Text = "Walk Speed:"
+walkSpeedLabel.Position = UDim2.new(0, 10, 0, 10)
+walkSpeedLabel.Size = UDim2.new(0, 90, 0, 30)
+walkSpeedLabel.TextColor3 = Color3.new(1, 1, 1)
+walkSpeedLabel.BackgroundTransparency = 1
 
-flyButton.MouseButton1Click:Connect(function()
-	if flying then
-		stopFlying()
-		flyButton.Text = "Activer Vol"
-	else
-		startFlying()
-		flyButton.Text = "Désactiver Vol"
+local walkSpeedBox = Instance.new("TextBox")
+walkSpeedBox.Parent = playerTab
+walkSpeedBox.Position = UDim2.new(0, 100, 0, 10)
+walkSpeedBox.Size = UDim2.new(0, 70, 0, 30)
+walkSpeedBox.PlaceholderText = "16"
+walkSpeedBox.Text = ""
+walkSpeedBox.TextColor3 = Color3.new(1, 1, 1)
+walkSpeedBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+walkSpeedBox.FocusLost:Connect(function()
+	local value = tonumber(walkSpeedBox.Text)
+	if value then
+		humanoid.WalkSpeed = value
 	end
 end)
 
--- 🔘 ESP Toggle
+-- JumpPower
+local jumpPowerLabel = Instance.new("TextLabel")
+jumpPowerLabel.Parent = playerTab
+jumpPowerLabel.Text = "Jump Power:"
+jumpPowerLabel.Position = UDim2.new(0, 10, 0, 50)
+jumpPowerLabel.Size = UDim2.new(0, 90, 0, 30)
+jumpPowerLabel.TextColor3 = Color3.new(1, 1, 1)
+jumpPowerLabel.BackgroundTransparency = 1
+
+local jumpPowerBox = Instance.new("TextBox")
+jumpPowerBox.Parent = playerTab
+jumpPowerBox.Position = UDim2.new(0, 100, 0, 50)
+jumpPowerBox.Size = UDim2.new(0, 70, 0, 30)
+jumpPowerBox.PlaceholderText = "50"
+jumpPowerBox.Text = ""
+jumpPowerBox.TextColor3 = Color3.new(1, 1, 1)
+jumpPowerBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+jumpPowerBox.FocusLost:Connect(function()
+	local value = tonumber(jumpPowerBox.Text)
+	if value then
+		humanoid.JumpPower = value
+	end
+end)
+
+-- Gravity
+local gravityLabel = Instance.new("TextLabel")
+gravityLabel.Parent = playerTab
+gravityLabel.Text = "Gravity:"
+gravityLabel.Position = UDim2.new(0, 10, 0, 90)
+gravityLabel.Size = UDim2.new(0, 90, 0, 30)
+gravityLabel.TextColor3 = Color3.new(1, 1, 1)
+gravityLabel.BackgroundTransparency = 1
+
+local gravityBox = Instance.new("TextBox")
+gravityBox.Parent = playerTab
+gravityBox.Position = UDim2.new(0, 100, 0, 90)
+gravityBox.Size = UDim2.new(0, 70, 0, 30)
+gravityBox.PlaceholderText = "196.2"
+gravityBox.Text = ""
+gravityBox.TextColor3 = Color3.new(1, 1, 1)
+gravityBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+gravityBox.FocusLost:Connect(function()
+	local value = tonumber(gravityBox.Text)
+	if value then
+		workspace.Gravity = value
+	end
+end)
+
+-- ESP Toggle
 local espButton = Instance.new("TextButton")
 espButton.Parent = mainTab
 espButton.Size = UDim2.new(0, 150, 0, 30)
@@ -196,7 +263,7 @@ local function createESP(p)
 	label.BackgroundTransparency = 1
 	label.Text = p.Name
 	label.TextColor3 = Color3.fromRGB(255, 0, 0)
-	label.TextScaled = true  -- Garde la taille adaptée pour le nom complet
+	label.TextScaled = true
 	label.Font = Enum.Font.SourceSansBold
 end
 
@@ -239,6 +306,38 @@ espButton.MouseButton1Click:Connect(function()
 	espButton.Text = espEnabled and "Désactiver ESP" or "Activer ESP"
 	toggleESP(espEnabled)
 end)
+
+-- Vol
+local flyButton = Instance.new("TextButton")
+flyButton.Parent = mainTab
+flyButton.Size = UDim2.new(0, 150, 0, 30)
+flyButton.Position = UDim2.new(0, 75, 0, 30)
+flyButton.Text = "Activer Vol"
+flyButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.TextSize = 14
+
+flyButton.MouseButton1Click:Connect(function()
+	if flying then
+		stopFlying()
+		flyButton.Text = "Activer Vol"
+	else
+		startFlying()
+		flyButton.Text = "Désactiver Vol"
+	end
+end)
+
+-- Misc
+local creatorLabel = Instance.new("TextLabel")
+creatorLabel.Parent = miscTab
+creatorLabel.Size = UDim2.new(1, 0, 1, 0)
+creatorLabel.Text = "🛠️ Created by : Anakondax & Traydox 🛠️"
+creatorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+creatorLabel.BackgroundTransparency = 1
+creatorLabel.TextSize = 16
+creatorLabel.TextWrapped = true
+creatorLabel.TextYAlignment = Enum.TextYAlignment.Center
+creatorLabel.TextXAlignment = Enum.TextXAlignment.Center
 
 toggleButton.MouseButton1Click:Connect(function()
 	frame.Visible = not frame.Visible
