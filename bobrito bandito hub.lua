@@ -365,33 +365,6 @@ teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportButton.TextSize = 14
 
--- Pseudo input for teleportation
-local teleportLabel = Instance.new("TextLabel")
-teleportLabel.Parent = playerTab
-teleportLabel.Text = "Pseudo du joueur:"
-teleportLabel.Position = UDim2.new(0, 10, 0, 130)  -- Position sous les autres éléments
-teleportLabel.Size = UDim2.new(0, 90, 0, 30)
-teleportLabel.TextColor3 = Color3.new(1, 1, 1)
-teleportLabel.BackgroundTransparency = 1
-
-local teleportBox = Instance.new("TextBox")
-teleportBox.Parent = playerTab
-teleportBox.Position = UDim2.new(0, 100, 0, 130)  -- Position à côté du label
-teleportBox.Size = UDim2.new(0, 100, 0, 30)
-teleportBox.PlaceholderText = "Nom du joueur"
-teleportBox.Text = ""
-teleportBox.TextColor3 = Color3.new(1, 1, 1)
-teleportBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-
-local teleportButton = Instance.new("TextButton")
-teleportButton.Parent = playerTab
-teleportButton.Size = UDim2.new(0, 150, 0, 30)
-teleportButton.Position = UDim2.new(0, 75, 0, 170)  -- Sous le TextBox
-teleportButton.Text = "Téléporter"
-teleportButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.TextSize = 14
-
 -- Fonction pour téléporter le joueur
 local function teleportToPlayer()
     local targetName = teleportBox.Text
@@ -416,10 +389,6 @@ local function teleportToPlayer()
         print("Le joueur n'a pas été trouvé.")
     end
 end
-
-teleportButton.MouseButton1Click:Connect(function()
-    teleportToPlayer()
-end)
 
 -- Misc
 local creatorLabel = Instance.new("TextLabel")
