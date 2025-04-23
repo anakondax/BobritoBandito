@@ -243,6 +243,7 @@ espButton.TextSize = 14
 
 local espEnabled = false
 local espConnections = {}
+local playerAddedConnection -- Variable pour stocker la connexion PlayerAdded
 
 local function createESP(p)
 	if p == player then return end
@@ -277,6 +278,7 @@ end
 
 local function toggleESP(state)
 	if state then
+		-- Activer ESP pour tous les joueurs déjà présents
 		for _, p in ipairs(game.Players:GetPlayers()) do
 			createESP(p)
 			espConnections[p] = p.CharacterAdded:Connect(function()
@@ -284,19 +286,28 @@ local function toggleESP(state)
 				createESP(p)
 			end)
 		end
-		game.Players.PlayerAdded:Connect(function(p)
+
+		-- Ajouter l'ESP pour les nouveaux joueurs qui rejoignent
+		playerAddedConnection = game.Players.PlayerAdded:Connect(function(p)
 			espConnections[p] = p.CharacterAdded:Connect(function()
 				p.Character:WaitForChild("HumanoidRootPart")
 				createESP(p)
 			end)
 		end)
 	else
+		-- Désactiver ESP pour tous les joueurs
 		for _, p in ipairs(game.Players:GetPlayers()) do
 			removeESP(p)
 			if espConnections[p] then
 				espConnections[p]:Disconnect()
 				espConnections[p] = nil
 			end
+		end
+
+		-- Supprimer les connexions pour les nouveaux joueurs
+		if playerAddedConnection then
+			playerAddedConnection:Disconnect()
+			playerAddedConnection = nil
 		end
 	end
 end
@@ -348,3 +359,40 @@ runService.Heartbeat:Connect(function()
 	updateFlight()
 	updateMovement()
 end)
+
+local function createPlayerInfoUI(parent)
+	local avatarSize = 50
+
+	-- Conteneur pour tout aligner proprement
+	local container = Instance.new("Frame")
+	container.Parent = parent
+	container.AnchorPoint = Vector2.new(1, 1)
+	container.Position = UDim2.new(1, -10, 1, -10)
+	container.Size = UDim2.new(0, avatarSize, 0, avatarSize + 22)
+	container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	container.BackgroundTransparency = 0.4
+	container.BorderSizePixel = 1
+	container.BorderColor3 = Color3.fromRGB(255, 255, 255)
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Parent = container
+	nameLabel.Position = UDim2.new(0, 0, 0, 0)
+	nameLabel.Size = UDim2.new(1, 0, 0, 20)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = player.Name
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextScaled = true
+	nameLabel.Font = Enum.Font.SourceSansBold
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+	local avatar = Instance.new("ImageLabel")
+	avatar.Parent = container
+	avatar.Position = UDim2.new(0, 0, 0, 22)
+	avatar.Size = UDim2.new(1, 0, 0, avatarSize)
+	avatar.BackgroundTransparency = 1
+	avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420"
+end
+
+createPlayerInfoUI(mainTab)
+createPlayerInfoUI(playerTab)
+createPlayerInfoUI(miscTab)
